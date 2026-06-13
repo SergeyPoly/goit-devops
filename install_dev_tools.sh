@@ -43,14 +43,16 @@ fi
 
 # 3. Проверка и установка Python 3 (минимум 3.9)
 if is_installed python3; then
-    # Получаем версию, например, "3.10.12"
-    PYTHON_VER=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
-    # Проверяем, что версия >= 3.9 (используем awk для надежного сравнения чисел)
-    if echo "$PYTHON_VER" | awk '{if ($1 >= 3.9) exit 0; else exit 1}'; then
-        echo "✓ Python 3 (версия $PYTHON_VER) уже установлен и соответствует требованиям."
+    # Получаем полную версию, например, "3.12.3"
+    PYTHON_VER=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")')
+
+    # Надежное сравнение версий с помощью sort -V
+    # Если минимальная версия (3.9.0) идет первой в отсортированном списке, значит установленная версия равна или новее.
+    if [ "$(printf '%s\n%s' "3.9.0" "$PYTHON_VER" | sort -V | head -n1)" = "3.9.0" ]; then
+        echo "✓ Python 3 (версия $PYTHON_VER) уже установлен и соответствует требованиям (>= 3.9)."
     else
         echo "Установленная версия Python ($PYTHON_VER) ниже 3.9. Обновление..."
-        sudo apt-get install -y python3.9 python3.9-venv python3-pip
+        sudo apt-get install -y python3 python3-pip python3-venv
     fi
 else
     echo "Установка Python 3 и pip..."
