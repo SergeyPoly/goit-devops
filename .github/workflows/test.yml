@@ -1,0 +1,14 @@
+name: Test Script
+on: push
+
+jobs:
+  test-install:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Run installation script
+        run: |
+          chmod u+x install_dev_tools.sh
+          ./install_dev_tools.sh
