@@ -11,6 +11,13 @@ services:
       - POSTGRES_PASSWORD=django_password
     ports:
       - "5432:5432"
+    # --- HEALTHCHECK ---
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U django_user -d django_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 3s
 
   web:
     build: .
@@ -24,7 +31,8 @@ services:
       - POSTGRES_USER=django_user
       - POSTGRES_PASSWORD=django_password
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   nginx:
     image: nginx:stable-alpine
