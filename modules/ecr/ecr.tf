@@ -5,9 +5,36 @@ resource "aws_ecr_repository" "repo" {
   image_scanning_configuration {
     scan_on_push = var.scan_on_push
   }
+
+  encryption_configuration {
+    encryption_type = "KMS"
+  }
 }
 
-# Жизненный цикл образов (удаляет старые образы, если их больше 10, чтобы не тратить деньги)
+resource "aws_ecr_repository_policy" "repo_policy" {
+  repository = aws_ecr_repository.repo.name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowPushPull"
+        Effect = "Allow"
+        Principal = "*"
+        Action = [
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:PutImage",
+          "ecr:InitiateLayerUpload",
+          "ecr:UploadLayerPart",
+          "ecr:CompleteLayerUpload"
+        ]
+      }
+    ]
+  })
+}
+
 resource "aws_ecr_lifecycle_policy" "policy" {
   repository = aws_ecr_repository.repo.name
 

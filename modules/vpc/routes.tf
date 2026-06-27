@@ -1,4 +1,4 @@
-# Таблица маршрутов для публичных подсетей (ведет в интернет)
+# Таблиця маршрутів для публічних підмереж (веде в інтернет через IGW)
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
 
@@ -16,10 +16,16 @@ resource "aws_route_table_association" "public" {
   route_table_id = aws_route_table.public.id
 }
 
-# Таблица маршрутов для приватных подсетей (закрытая)
+# Таблиця маршрутів для приватних підмереж (веде в інтернет через NAT Gateway)
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
-  tags   = { Name = "${var.vpc_name}-private-rt" }
+
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat.id
+  }
+
+  tags = { Name = "${var.vpc_name}-private-rt" }
 }
 
 resource "aws_route_table_association" "private" {
