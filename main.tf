@@ -35,3 +35,11 @@ module "ecr" {
   ecr_name     = "lesson-5-ecr"
   scan_on_push = true
 }
+
+# 4. Модуль EKS кластера
+module "eks" {
+  source             = "./modules/eks"
+  cluster_name       = "lesson-7-eks"
+  vpc_id             = module.vpc.vpc_id
+  private_subnet_ids = module.vpc.private_subnet_ids # Передаем приватные подсети
+}
