@@ -66,25 +66,30 @@ spec:
         stage('Update Helm Values in Git') {
             steps {
                 container('git-tools') {
+                    sh """
+                    # Установка yq для редактирования YAML
+                    wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
+                    chmod +x /usr/bin/yq
+
+                    # .git создан процессом агента (другой UID) - разрешаем работу с ним
+                    git config --global --add safe.directory '*'
+
+                    # Обновление тега образа в values.yaml
+                    yq eval '.image.tag = "${BUILD_NUMBER}"' -i ${HELM_VALUES}
+
+                    # Настройка Git
+                    git config user.email "jenkins@ci.com"
+                    git config user.name "Jenkins CI"
+                    git add ${HELM_VALUES}
+                    git commit -m "ci: update image tag to ${BUILD_NUMBER} [skip ci]" || echo "No changes to commit"
+                    """
+
                     withCredentials([usernamePassword(credentialsId: env.GIT_CRED_ID, usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
-                        sh """
-                        # Установка yq для редактирования YAML
-                        wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
-                        chmod +x /usr/bin/yq
-
-                        # Обновление тега образа в values.yaml
-                        yq eval '.image.tag = "${BUILD_NUMBER}"' -i ${HELM_VALUES}
-
-                        # Настройка Git и пуш изменений
-                        git config user.email "jenkins@ci.com"
-                        git config user.name "Jenkins CI"
-                        git add ${HELM_VALUES}
-                        git commit -m "ci: update image tag to ${BUILD_NUMBER} [skip ci]" || echo "No changes to commit"
-
-                        # Пуш изменений обратно в репозиторий с токеном
+                        // Одинарные кавычки - без Groovy-интерполяции секрета в текст скрипта
+                        sh '''
                         git remote set-url origin "https://${GIT_USER}:${GIT_TOKEN}@github.com/SergeyPoly/goit-devops.git"
                         git push origin HEAD:lesson-8-9
-                        """
+                        '''
                     }
                 }
             }
