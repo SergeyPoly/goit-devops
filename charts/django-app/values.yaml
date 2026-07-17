@@ -1,20 +1,16 @@
 replicaCount: 2
-
 image:
   repository: "645819131673.dkr.ecr.us-west-2.amazonaws.com/lesson-5-ecr"
-  tag: "latest"
+  tag: "2"
   pullPolicy: IfNotPresent
-
 service:
   type: LoadBalancer
   port: 80
-
 autoscaling:
   enabled: true
   minReplicas: 2
   maxReplicas: 6
   targetCPUUtilizationPercentage: 70
-
 env:
   POSTGRES_DB: "django_db"
   POSTGRES_USER: "django_user"
