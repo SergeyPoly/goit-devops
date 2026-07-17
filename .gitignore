@@ -69,3 +69,5 @@ Plaintext
 .terraform.lock.hcl
 *.tfvars
 *.tfvars.json
+tfplan*
+*.log

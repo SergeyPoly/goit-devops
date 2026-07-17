@@ -12,6 +12,28 @@ provider "aws" {
   region = var.aws_region
 }
 
+provider "kubernetes" {
+  host                   = module.eks.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    command     = "aws"
+    args        = ["eks", "get-token", "--cluster-name", "lesson-7-eks"]
+  }
+}
+
+provider "helm" {
+  kubernetes = {
+    host                   = module.eks.cluster_endpoint
+    cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+    exec = {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      command     = "aws"
+      args        = ["eks", "get-token", "--cluster-name", "lesson-7-eks"]
+    }
+  }
+}
+
 # 1. Модуль S3 и DynamoDB для стейта
 module "s3_backend" {
   source      = "./modules/s3-backend"
@@ -41,5 +63,19 @@ module "eks" {
   source             = "./modules/eks"
   cluster_name       = "lesson-7-eks"
   vpc_id             = module.vpc.vpc_id
-  private_subnet_ids = module.vpc.private_subnet_ids # Передаем приватные подсети
+  private_subnet_ids = module.vpc.private_subnet_ids
+}
+
+# Модуль Jenkins
+module "jenkins" {
+  source     = "./modules/jenkins"
+  depends_on = [module.eks]
+}
+
+# Модуль Argo CD
+module "argo_cd" {
+  source   = "./modules/argo_cd"
+  repo_url = "https://github.com/SergeyPoly/goit-devops.git"
+
+  depends_on = [module.eks]
 }

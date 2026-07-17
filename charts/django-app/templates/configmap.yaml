@@ -3,8 +3,9 @@ kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-config
 data:
-  POSTGRES_DB: "django_db"
-  POSTGRES_USER: "django_user"
-  POSTGRES_PASSWORD: "django_password"
-  POSTGRES_HOST: "db"
-  ALLOWED_HOSTS: "*"
+  POSTGRES_DB: {{ .Values.env.POSTGRES_DB | quote }}
+  POSTGRES_USER: {{ .Values.env.POSTGRES_USER | quote }}
+  POSTGRES_HOST: {{ .Values.env.POSTGRES_HOST | quote }}
+  DATABASE_HOST: {{ .Values.env.DATABASE_HOST | quote }}
+  DB_HOST: {{ .Values.env.DB_HOST | quote }}
+  ALLOWED_HOSTS: {{ .Values.env.ALLOWED_HOSTS | quote }}

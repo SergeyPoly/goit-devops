@@ -4,7 +4,6 @@ metadata:
   name: {{ .Release.Name }}-web
   labels:
     app: {{ .Release.Name }}-web
-public_access_block:
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -30,4 +29,6 @@ spec:
                 memory: 256Mi
             envFrom:
               - configMapRef:
-                  name: {{ .Release.Name }}-config
+                  name: "{{ .Release.Name }}-config"
+              - secretRef:
+                  name: "{{ .Release.Name }}-secret"

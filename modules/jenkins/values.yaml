@@ -1,0 +1,14 @@
+controller:
+  componentName: "jenkins-controller"
+  image:
+    registry: "docker.io"
+    repository: "jenkins/jenkins"
+    tag: "lts"
+  serviceType: LoadBalancer
+  installPlugins:
+    - kubernetes
+    - workflow-aggregator
+    - git
+
+testEngine:
+  active: false
