@@ -1,0 +1,54 @@
+# Alertmanager не потрібен для базового моніторингу (лише Prometheus + Grafana),
+# вимикаємо, щоб зекономити ресурси на t3.small нодах.
+alertmanager:
+  enabled: false
+
+grafana:
+  # ClusterIP навмисно: доступ через kubectl port-forward (див. README /
+  # outputs модуля), щоб не плодити ще один LoadBalancer/ELB.
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
+
+prometheus:
+  prometheusSpec:
+    retention: 6h
+    replicas: 1
+    resources:
+      requests:
+        cpu: "200m"
+        memory: "512Mi"
+      limits:
+        cpu: "1000m"
+        memory: "1Gi"
+
+prometheusOperator:
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "300m"
+      memory: "256Mi"
+
+kube-state-metrics:
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "64Mi"
+    limits:
+      cpu: "100m"
+      memory: "128Mi"
+
+prometheus-node-exporter:
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "32Mi"
+    limits:
+      cpu: "100m"
+      memory: "64Mi"

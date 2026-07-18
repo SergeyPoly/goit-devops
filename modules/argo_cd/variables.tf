@@ -16,6 +16,17 @@ variable "repo_url" {
   description = "Git repository URL for Argo CD to sync application from"
 }
 
+variable "target_revision" {
+  type        = string
+  default     = "main"
+  description = "Git-гілка/тег, за якою Argo CD стежить у repo_url"
+}
+
+variable "postgres_host" {
+  type        = string
+  description = "Хост БД (RDS endpoint), що прокидається в django-app як Argo CD Application Helm-параметр env.POSTGRES_HOST"
+}
+
 variable "postgres_password" {
   type        = string
   description = "PostgreSQL password, injected into the django-app release as an Argo CD Application Helm parameter (never committed to Git)"

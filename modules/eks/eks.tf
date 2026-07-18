@@ -90,16 +90,16 @@ resource "aws_eks_node_group" "main" {
   subnet_ids      = var.private_subnet_ids
 
   scaling_config {
-    desired_size = 2
-    max_size     = 2
-    min_size     = 1
+    desired_size = var.desired_size
+    max_size     = var.max_size
+    min_size     = var.min_size
   }
 
   update_config {
     max_unavailable = 1
   }
 
-  instance_types = ["t3.small"]
+  instance_types = var.instance_types
 
   launch_template {
     id      = aws_launch_template.nodes.id

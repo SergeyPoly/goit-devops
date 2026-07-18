@@ -14,9 +14,7 @@ autoscaling:
 env:
   POSTGRES_DB: "django_db"
   POSTGRES_USER: "django_user"
-  POSTGRES_HOST: "db"
-  DATABASE_HOST: "db"
-  DB_HOST: "db"
+  POSTGRES_HOST: "" # required, RDS endpoint - set через Argo CD parameter (env.POSTGRES_HOST)
   ALLOWED_HOSTS: "*"
 
 secrets:

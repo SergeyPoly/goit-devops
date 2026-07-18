@@ -66,29 +66,22 @@ module "eks" {
   cluster_name       = "lesson-7-eks"
   vpc_id             = module.vpc.vpc_id
   private_subnet_ids = module.vpc.private_subnet_ids
-}
 
-# Модуль Jenkins
-module "jenkins" {
-  source     = "./modules/jenkins"
-  depends_on = [module.eks]
-}
-
-# Модуль Argo CD
-module "argo_cd" {
-  source            = "./modules/argo_cd"
-  repo_url          = "https://github.com/SergeyPoly/goit-devops.git"
-  postgres_password = var.postgres_password
-  django_secret_key = var.django_secret_key
-
-  depends_on = [module.eks]
+  # t3.medium замість t3.small: фінальний проєкт додає kube-prometheus-stack
+  # (Prometheus + Grafana + kube-state-metrics + node-exporter) поверх уже
+  # наявних Jenkins/Argo CD/Django - на t3.small ноди вже впирались у ліміти
+  # ресурсів/подів на етапі lesson-8-9 без моніторингу.
+  instance_types = ["t3.medium"]
+  desired_size   = 2
+  min_size       = 1
+  max_size       = 2
 }
 
 # 5. Модуль RDS: звичайна БД або Aurora-кластер залежно від rds_use_aurora
 module "rds" {
   source = "./modules/rds"
 
-  name       = "lesson-db-module"
+  name       = "final-project-db"
   use_aurora = var.rds_use_aurora
 
   db_name  = "app_db"
@@ -102,6 +95,30 @@ module "rds" {
 
   tags = {
     Project = "goit-devops"
-    Lesson  = "lesson-db-module"
+    Lesson  = "final-project"
   }
+}
+
+# Модуль Jenkins
+module "jenkins" {
+  source     = "./modules/jenkins"
+  depends_on = [module.eks]
+}
+
+# Модуль Argo CD
+module "argo_cd" {
+  source            = "./modules/argo_cd"
+  repo_url          = "https://github.com/SergeyPoly/goit-devops.git"
+  target_revision   = "final-project"
+  postgres_password = var.postgres_password
+  django_secret_key = var.django_secret_key
+  postgres_host     = module.rds.endpoint
+
+  depends_on = [module.eks]
+}
+
+# Модуль моніторингу: Prometheus + Grafana (kube-prometheus-stack)
+module "monitoring" {
+  source     = "./modules/monitoring"
+  depends_on = [module.eks]
 }

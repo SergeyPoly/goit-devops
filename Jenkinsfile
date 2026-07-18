@@ -88,7 +88,7 @@ spec:
                         // Одинарные кавычки - без Groovy-интерполяции секрета в текст скрипта
                         sh '''
                         git remote set-url origin "https://${GIT_USER}:${GIT_TOKEN}@github.com/SergeyPoly/goit-devops.git"
-                        git push origin HEAD:lesson-8-9
+                        git push origin HEAD:final-project
                         '''
                     }
                 }

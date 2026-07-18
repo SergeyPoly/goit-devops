@@ -30,6 +30,14 @@ resource "helm_release" "argocd_apps" {
     {
       name  = "repoUrl"
       value = var.repo_url
+    },
+    {
+      name  = "targetRevision"
+      value = var.target_revision
+    },
+    {
+      name  = "postgresHost"
+      value = var.postgres_host
     }
   ]
 

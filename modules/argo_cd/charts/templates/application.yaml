@@ -19,6 +19,8 @@ spec:
           value: {{ .Values.postgresPassword | quote }}
         - name: secrets.DJANGO_SECRET_KEY
           value: {{ .Values.djangoSecretKey | quote }}
+        - name: env.POSTGRES_HOST
+          value: {{ .Values.postgresHost | quote }}
   destination:
     server: https://kubernetes.default.svc
     namespace: default

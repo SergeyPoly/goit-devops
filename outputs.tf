@@ -68,3 +68,15 @@ output "rds_password" {
   value     = module.rds.password
   sensitive = true
 }
+
+output "grafana_port_forward_command" {
+  value = module.monitoring.grafana_port_forward_command
+}
+
+output "grafana_admin_password_command" {
+  value = module.monitoring.grafana_admin_password_command
+}
+
+output "prometheus_port_forward_command" {
+  value = module.monitoring.prometheus_port_forward_command
+}
