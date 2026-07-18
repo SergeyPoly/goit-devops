@@ -83,3 +83,25 @@ module "argo_cd" {
 
   depends_on = [module.eks]
 }
+
+# 5. Модуль RDS: звичайна БД або Aurora-кластер залежно від rds_use_aurora
+module "rds" {
+  source = "./modules/rds"
+
+  name       = "lesson-db-module"
+  use_aurora = var.rds_use_aurora
+
+  db_name  = "app_db"
+  username = "app_user"
+  password = var.rds_password
+
+  vpc_id              = module.vpc.vpc_id
+  subnet_private_ids  = module.vpc.private_subnet_ids
+  subnet_public_ids   = module.vpc.public_subnet_ids
+  allowed_cidr_blocks = ["10.0.0.0/16"]
+
+  tags = {
+    Project = "goit-devops"
+    Lesson  = "lesson-db-module"
+  }
+}

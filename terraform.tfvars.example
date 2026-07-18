@@ -1,5 +1,10 @@
 # Скопіюй у terraform.tfvars (gitignored) і заповни реальними значеннями,
-# або передай через TF_VAR_postgres_password / TF_VAR_django_secret_key.
+# або передай через TF_VAR_<ім'я_змінної>.
 
 postgres_password = "change-me"
 django_secret_key = "change-me"
+
+# rds_password не обов'язковий - якщо не задати (або null), модуль rds
+# згенерує пароль автоматично.
+# rds_password = "change-me"
+# rds_use_aurora = false

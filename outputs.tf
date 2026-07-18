@@ -41,3 +41,30 @@ output "argocd_url_command" {
 output "argocd_admin_password_command" {
   value = module.argo_cd.admin_password_command
 }
+
+output "rds_endpoint" {
+  description = "Connection endpoint бази даних (writer endpoint для Aurora)"
+  value       = module.rds.endpoint
+}
+
+output "rds_reader_endpoint" {
+  description = "Aurora reader endpoint (null для звичайного RDS)"
+  value       = module.rds.reader_endpoint
+}
+
+output "rds_port" {
+  value = module.rds.port
+}
+
+output "rds_db_name" {
+  value = module.rds.db_name
+}
+
+output "rds_username" {
+  value = module.rds.username
+}
+
+output "rds_password" {
+  value     = module.rds.password
+  sensitive = true
+}

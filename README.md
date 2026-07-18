@@ -47,8 +47,10 @@ flowchart LR
 │   │                          # launch template (IMDS hop-limit=2), EBS CSI addon,
 │   │                          # дефолтний StorageClass gp3
 │   ├── jenkins/                # Helm-реліз Jenkins (namespace jenkins)
-│   └── argo_cd/                 # Helm-реліз Argo CD (namespace argocd) +
-│       └── charts/              # локальний чарт з ресурсом Application (django-app)
+│   ├── argo_cd/                 # Helm-реліз Argo CD (namespace argocd) +
+│   │   └── charts/              # локальний чарт з ресурсом Application (django-app)
+│   └── rds/                     # Універсальний модуль БД: RDS або Aurora
+│                                 # (перемикається rds_use_aurora) — див. modules/rds/README.md
 │
 └── charts/django-app/           # Helm-чарт застосунку, який синхронізує Argo CD
     ├── templates/                # deployment, service, configmap, secret, hpa, db-service
@@ -63,6 +65,10 @@ flowchart LR
   LoadBalancer-сервіси (Jenkins, Argo CD, django-app) **не покриваються Free
   Tier** — не забувай `terraform destroy` одразу після перевірки/здачі
   (розділ [Знищення інфраструктури](#знищення-інфраструктури)).
+- Скопіюй `terraform.tfvars.example` у `terraform.tfvars` (gitignored) і
+  задай `postgres_password`, `django_secret_key`. `rds_password` — опційний
+  (модуль `rds` згенерує пароль сам, якщо не задати). Детально про модуль
+  `rds` (звичайна БД / Aurora) — у [`modules/rds/README.md`](modules/rds/README.md).
 
 ## 1. Як застосувати Terraform
 
