@@ -25,7 +25,7 @@ flowchart LR
     J4 -- git push --> Repo
 
     Repo -- watch lesson-8-9 --> Argo[Argo CD Application\ndjango-app]
-    Argo -- helm sync --auto-prune --self-heal --> EKS[(EKS\ndefault namespace)]
+    Argo -- "helm sync (prune + selfHeal)" --> EKS[(EKS\ndefault namespace)]
     EKS --> App[django-app-web + db]
     ECR -- image pull --> App
 ```
