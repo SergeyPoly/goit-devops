@@ -20,7 +20,7 @@ variable "engine" {
 variable "engine_version" {
   description = "Версія engine для звичайного RDS-інстансу"
   type        = string
-  default     = "16.4"
+  default     = "16.14"
 }
 
 variable "parameter_group_family_rds" {
@@ -40,7 +40,7 @@ variable "engine_cluster" {
 variable "engine_version_cluster" {
   description = "Версія engine для Aurora-кластера"
   type        = string
-  default     = "16.4"
+  default     = "16.13"
 }
 
 variable "parameter_group_family_aurora" {

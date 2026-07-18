@@ -64,7 +64,7 @@ module "rds" {
 
   use_aurora           = true
   engine_cluster       = "aurora-postgresql"
-  engine_version_cluster = "16.4"
+  engine_version_cluster = "16.14"
   aurora_replica_count = 2
   instance_class       = "db.r6g.large"
 
@@ -86,8 +86,8 @@ module "rds" {
 | Що змінити | Яка змінна |
 |---|---|
 | Aurora-кластер замість звичайної БД | `use_aurora = true` |
-| Engine звичайного RDS (postgres/mysql/mariadb) | `engine` + `engine_version` + `parameter_group_family_rds` (мають бути узгоджені, наприклад `postgres` / `16.4` / `postgres16`) |
-| Engine Aurora-кластера | `engine_cluster` + `engine_version_cluster` + `parameter_group_family_aurora` (наприклад `aurora-postgresql` / `16.4` / `aurora-postgresql16`) |
+| Engine звичайного RDS (postgres/mysql/mariadb) | `engine` + `engine_version` + `parameter_group_family_rds` (мають бути узгоджені, наприклад `postgres` / `16.14` / `postgres16`) |
+| Engine Aurora-кластера | `engine_cluster` + `engine_version_cluster` + `parameter_group_family_aurora` (наприклад `aurora-postgresql` / `16.14` / `aurora-postgresql16`) |
 | Розмір інстансу | `instance_class` (напр. `db.t3.micro` для Free Tier, `db.r6g.large` для продакшн-Aurora) |
 | Кількість Aurora reader-реплік | `aurora_replica_count` (writer створюється завжди додатково, незалежно від цього числа) |
 | Multi-AZ (лише звичайний RDS) | `multi_az = true` |
@@ -108,10 +108,10 @@ aws rds describe-db-engine-versions --engine aurora-postgresql --query 'DBEngine
 | `name` | `string` | — (обов'язкова) | Базове ім'я для інстансу/кластера та всіх супутніх ресурсів |
 | `use_aurora` | `bool` | `false` | `true` → Aurora Cluster, `false` → звичайна `aws_db_instance` |
 | `engine` | `string` | `"postgres"` | Engine звичайного RDS |
-| `engine_version` | `string` | `"16.4"` | Версія engine звичайного RDS |
+| `engine_version` | `string` | `"16.14"` | Версія engine звичайного RDS |
 | `parameter_group_family_rds` | `string` | `"postgres16"` | Family parameter group звичайного RDS |
 | `engine_cluster` | `string` | `"aurora-postgresql"` | Engine Aurora-кластера |
-| `engine_version_cluster` | `string` | `"16.4"` | Версія engine Aurora-кластера |
+| `engine_version_cluster` | `string` | `"16.14"` | Версія engine Aurora-кластера |
 | `parameter_group_family_aurora` | `string` | `"aurora-postgresql16"` | Family cluster parameter group Aurora |
 | `aurora_replica_count` | `number` | `0` | Кількість Aurora reader-реплік (writer — завжди +1 до цього числа) |
 | `instance_class` | `string` | `"db.t3.micro"` | Клас інстансу БД |

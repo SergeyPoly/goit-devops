@@ -12,27 +12,34 @@ provider "aws" {
   region = var.aws_region
 }
 
-data "aws_eks_cluster" "cluster" {
-  name       = module.eks.cluster_name
-  depends_on = [module.eks]
-}
-
-data "aws_eks_cluster_auth" "cluster" {
-  name       = module.eks.cluster_name
-  depends_on = [module.eks]
-}
-
+# Автентифікація провайдерів kubernetes/helm через exec (aws eks get-token),
+# який запитує свіжий токен щоразу при зверненні до кластера.
+# Свідомо НЕ через data.aws_eks_cluster(_auth): на цьому проєкті це двічі
+# призводило до реальних збоїв - (1) aws_eks_cluster_auth.token живе лише
+# ~15 хв, а довгий apply (EKS + node group + RDS + кілька Helm-релізів) це
+# перевищує; (2) provider, сконфігурований через data source, що залежить
+# від module.eks, під час plan іноді не встигає резолвитись і провайдер
+# фолбечиться на localhost. module.eks.cluster_endpoint - це output модуля,
+# обчислюється одразу після створення кластера, без цих проблем.
 provider "kubernetes" {
-  host                   = data.aws_eks_cluster.cluster.endpoint
-  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
-  token                  = data.aws_eks_cluster_auth.cluster.token
+  host                   = module.eks.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    command     = "aws"
+    args        = ["eks", "get-token", "--cluster-name", "lesson-7-eks"]
+  }
 }
 
 provider "helm" {
   kubernetes = {
-    host                   = data.aws_eks_cluster.cluster.endpoint
-    cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
-    token                  = data.aws_eks_cluster_auth.cluster.token
+    host                   = module.eks.cluster_endpoint
+    cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+    exec = {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      command     = "aws"
+      args        = ["eks", "get-token", "--cluster-name", "lesson-7-eks"]
+    }
   }
 }
 
@@ -67,11 +74,13 @@ module "eks" {
   vpc_id             = module.vpc.vpc_id
   private_subnet_ids = module.vpc.private_subnet_ids
 
-  # t3.medium замість t3.small: фінальний проєкт додає kube-prometheus-stack
-  # (Prometheus + Grafana + kube-state-metrics + node-exporter) поверх уже
-  # наявних Jenkins/Argo CD/Django - на t3.small ноди вже впирались у ліміти
-  # ресурсів/подів на етапі lesson-8-9 без моніторингу.
-  instance_types = ["t3.medium"]
+  # t3.small пройшов account-level Free Tier guardrail, але вперся у ліміт
+  # max-pods-per-node (ENI/IP), не в CPU/RAM: kubectl describe pod показував
+  # "Too many pods" при 27-79% використання ресурсів. m7i-flex.large - теж
+  # у списку free-tier-eligible для цього акаунта (aws ec2
+  # describe-instance-types --filters Name=free-tier-eligible,Values=true),
+  # і як "large" інстанс дає значно вищий ліміт подів на ноду.
+  instance_types = ["m7i-flex.large"]
   desired_size   = 2
   min_size       = 1
   max_size       = 2
@@ -87,6 +96,10 @@ module "rds" {
   db_name  = "app_db"
   username = "app_user"
   password = var.rds_password
+
+  # Free Tier guardrail цього акаунта відхиляє дефолтні 7 днів бекапів
+  # (FreeTierRestrictionError на CreateDBInstance) - тримаємо мінімум.
+  backup_retention_period = 1
 
   vpc_id              = module.vpc.vpc_id
   subnet_private_ids  = module.vpc.private_subnet_ids
