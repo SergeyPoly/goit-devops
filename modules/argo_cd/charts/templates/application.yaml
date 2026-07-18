@@ -14,6 +14,11 @@ spec:
     helm:
       valueFiles:
         - values.yaml
+      parameters:
+        - name: secrets.POSTGRES_PASSWORD
+          value: {{ .Values.postgresPassword | quote }}
+        - name: secrets.DJANGO_SECRET_KEY
+          value: {{ .Values.djangoSecretKey | quote }}
   destination:
     server: https://kubernetes.default.svc
     namespace: default

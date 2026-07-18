@@ -5,6 +5,13 @@ controller:
     repository: "jenkins/jenkins"
     tag: "2.504.1-jdk17"
   serviceType: LoadBalancer
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "512Mi"
+    limits:
+      cpu: "2000m"
+      memory: "2048Mi"
   # Дефолтний список чарту (helm show values jenkins/jenkins) із оновленою
   # версією configuration-as-code: git 5.7.0 (через git-client 6.4.3) вимагає
   # новішу за ту, що зафіксована в чарті за замовчуванням.
@@ -21,6 +28,16 @@ controller:
       failureThreshold: 60
       periodSeconds: 10
       timeoutSeconds: 5
+
+agent:
+  enabled: true
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "256Mi"
+    limits:
+      cpu: "1000m"
+      memory: "512Mi"
 
 testEngine:
   active: false

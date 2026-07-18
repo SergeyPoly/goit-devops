@@ -1,3 +1,5 @@
 repoUrl: "https://github.com/SergeyPoly/goit-devops.git"
 targetRevision: "lesson-8-9"
 path: "charts/django-app"
+postgresPassword: ""
+djangoSecretKey: ""

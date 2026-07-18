@@ -1,3 +1,5 @@
+data "aws_caller_identity" "current" {}
+
 resource "aws_ecr_repository" "repo" {
   name                 = var.ecr_name
   image_tag_mutability = "MUTABLE"
@@ -20,7 +22,9 @@ resource "aws_ecr_repository_policy" "repo_policy" {
       {
         Sid    = "AllowPushPull"
         Effect = "Allow"
-        Principal = "*"
+        Principal = {
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+        }
         Action = [
           "ecr:GetDownloadUrlForLayer",
           "ecr:BatchGetImage",

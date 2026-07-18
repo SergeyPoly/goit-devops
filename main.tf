@@ -12,25 +12,27 @@ provider "aws" {
   region = var.aws_region
 }
 
+data "aws_eks_cluster" "cluster" {
+  name       = module.eks.cluster_name
+  depends_on = [module.eks]
+}
+
+data "aws_eks_cluster_auth" "cluster" {
+  name       = module.eks.cluster_name
+  depends_on = [module.eks]
+}
+
 provider "kubernetes" {
-  host                   = module.eks.cluster_endpoint
-  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-  exec {
-    api_version = "client.authentication.k8s.io/v1beta1"
-    command     = "aws"
-    args        = ["eks", "get-token", "--cluster-name", "lesson-7-eks"]
-  }
+  host                   = data.aws_eks_cluster.cluster.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
+  token                  = data.aws_eks_cluster_auth.cluster.token
 }
 
 provider "helm" {
   kubernetes = {
-    host                   = module.eks.cluster_endpoint
-    cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-    exec = {
-      api_version = "client.authentication.k8s.io/v1beta1"
-      command     = "aws"
-      args        = ["eks", "get-token", "--cluster-name", "lesson-7-eks"]
-    }
+    host                   = data.aws_eks_cluster.cluster.endpoint
+    cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
+    token                  = data.aws_eks_cluster_auth.cluster.token
   }
 }
 
@@ -74,8 +76,10 @@ module "jenkins" {
 
 # Модуль Argo CD
 module "argo_cd" {
-  source   = "./modules/argo_cd"
-  repo_url = "https://github.com/SergeyPoly/goit-devops.git"
+  source            = "./modules/argo_cd"
+  repo_url          = "https://github.com/SergeyPoly/goit-devops.git"
+  postgres_password = var.postgres_password
+  django_secret_key = var.django_secret_key
 
   depends_on = [module.eks]
 }

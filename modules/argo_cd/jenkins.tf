@@ -33,6 +33,17 @@ resource "helm_release" "argocd_apps" {
     }
   ]
 
+  set_sensitive = [
+    {
+      name  = "postgresPassword"
+      value = var.postgres_password
+    },
+    {
+      name  = "djangoSecretKey"
+      value = var.django_secret_key
+    }
+  ]
+
   wait = false
 
   depends_on = [

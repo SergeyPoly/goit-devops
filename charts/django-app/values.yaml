@@ -14,8 +14,11 @@ autoscaling:
 env:
   POSTGRES_DB: "django_db"
   POSTGRES_USER: "django_user"
-  POSTGRES_PASSWORD: "django_password"
   POSTGRES_HOST: "db"
   DATABASE_HOST: "db"
   DB_HOST: "db"
   ALLOWED_HOSTS: "*"
+
+secrets:
+  POSTGRES_PASSWORD: ""      # required, set via --set or Argo CD parameter
+  DJANGO_SECRET_KEY: ""      # required, set via --set or Argo CD parameter
