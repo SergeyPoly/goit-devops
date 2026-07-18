@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-config
+data:
+  POSTGRES_DB: {{ .Values.env.POSTGRES_DB | quote }}
+  POSTGRES_USER: {{ .Values.env.POSTGRES_USER | quote }}
+  POSTGRES_HOST: {{ required "env.POSTGRES_HOST is required (RDS endpoint)" .Values.env.POSTGRES_HOST | quote }}
+  ALLOWED_HOSTS: {{ .Values.env.ALLOWED_HOSTS | quote }}

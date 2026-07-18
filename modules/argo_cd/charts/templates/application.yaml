@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: django-app
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: {{ .Values.repoUrl }}
+    targetRevision: {{ .Values.targetRevision }}
+    path: {{ .Values.path }}
+    helm:
+      valueFiles:
+        - values.yaml
+      parameters:
+        - name: secrets.POSTGRES_PASSWORD
+          value: {{ .Values.postgresPassword | quote }}
+        - name: secrets.DJANGO_SECRET_KEY
+          value: {{ .Values.djangoSecretKey | quote }}
+        - name: env.POSTGRES_HOST
+          value: {{ .Values.postgresHost | quote }}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

@@ -1,0 +1,6 @@
+repoUrl: "https://github.com/SergeyPoly/goit-devops.git"
+targetRevision: "main"
+path: "charts/django-app"
+postgresPassword: ""
+djangoSecretKey: ""
+postgresHost: ""
