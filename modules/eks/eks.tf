@@ -137,3 +137,17 @@ resource "aws_eks_addon" "metrics_server" {
 
   depends_on = [aws_eks_node_group.main]
 }
+
+# 9. OIDC-провайдер кластера - потрібен для IRSA (IAM Roles for Service
+# Accounts), щоб окремі поди (наприклад, Kaniko-агент Jenkins) могли
+# отримувати вузько-скоуплені AWS-права через ServiceAccount, а не через
+# широку роль ноди.
+data "tls_certificate" "eks" {
+  url = aws_eks_cluster.main.identity[0].oidc[0].issuer
+}
+
+resource "aws_iam_openid_connect_provider" "eks" {
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = [data.tls_certificate.eks.certificates[0].sha1_fingerprint]
+  url             = aws_eks_cluster.main.identity[0].oidc[0].issuer
+}

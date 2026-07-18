@@ -27,6 +27,25 @@ spec:
               requests:
                 cpu: 200m
                 memory: 256Mi
+            # /admin/ використаний як health-check: власного /healthz у
+            # застосунку немає, а /admin/ повертає 2xx/3xx одразу після
+            # старту Django без потреби в автентифікації.
+            livenessProbe:
+              httpGet:
+                path: /admin/
+                port: 8000
+              initialDelaySeconds: 15
+              periodSeconds: 20
+              timeoutSeconds: 5
+              failureThreshold: 3
+            readinessProbe:
+              httpGet:
+                path: /admin/
+                port: 8000
+              initialDelaySeconds: 5
+              periodSeconds: 10
+              timeoutSeconds: 5
+              failureThreshold: 3
             envFrom:
               - configMapRef:
                   name: "{{ .Release.Name }}-config"

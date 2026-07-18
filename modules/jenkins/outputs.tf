@@ -2,6 +2,11 @@ output "jenkins_namespace" {
   value = kubernetes_namespace_v1.jenkins.metadata[0].name
 }
 
+output "kaniko_service_account" {
+  description = "ServiceAccount (IRSA), яку Jenkinsfile використовує для агента Kaniko"
+  value       = kubernetes_service_account_v1.kaniko.metadata[0].name
+}
+
 output "url_command" {
   description = "Команда для отримання зовнішньої адреси Jenkins"
   value       = "kubectl get svc -n jenkins jenkins -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'"

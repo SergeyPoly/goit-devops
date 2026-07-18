@@ -46,7 +46,9 @@ flowchart LR
 │   ├── eks/                   # EKS кластер, managed node group (2×t3.small),
 │   │                          # launch template (IMDS hop-limit=2), EBS CSI addon,
 │   │                          # дефолтний StorageClass gp3
-│   ├── jenkins/                # Helm-реліз Jenkins (namespace jenkins)
+│   ├── jenkins/                # Helm-реліз Jenkins (namespace jenkins) +
+│   │                           # irsa.tf: IAM-роль + ServiceAccount (IRSA)
+│   │                           # для Kaniko-агента (ECR push без прав ноди)
 │   └── argo_cd/                 # Helm-реліз Argo CD (namespace argocd) +
 │       └── charts/              # локальний чарт з ресурсом Application (django-app)
 │
@@ -178,13 +180,16 @@ kubectl patch application django-app -n argocd --type merge `
 
 ## Відомі обмеження
 
-- `metrics-server` у кластері не встановлений, тому HPA (`django-app-hpa`) не
-  бачить CPU-метрик (об'єкт створюється, але масштабування не спрацює, поки
-  не поставити `metrics-server` окремим Helm-релізом).
 - PostgreSQL (`db`) використовує `emptyDir` — дані не переживають
   перестворення пода, підходить лише для демонстрації.
 - Кредити Jenkins (`github-credentials`) і Jenkins job створюються вручну
   через UI — в Terraform/JCasC це не автоматизовано.
+- `livenessProbe`/`readinessProbe` django-app ходять на `/admin/` (у
+  застосунку немає власного `/healthz`) — 2xx/3xx на цьому шляху достатньо
+  Kubernetes, автентифікація не потрібна.
+- Kaniko-агент отримує права на ECR push через IRSA (ServiceAccount
+  `jenkins-kaniko`, роль `jenkins-kaniko-irsa`), а не через instance-профіль
+  ноди — див. `modules/jenkins/irsa.tf`.
 
 ## Знищення інфраструктури
 
