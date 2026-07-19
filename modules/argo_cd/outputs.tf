@@ -3,8 +3,8 @@ output "argocd_namespace" {
 }
 
 output "url_command" {
-  description = "Команда для отримання зовнішньої адреси Argo CD"
-  value       = "kubectl get svc -n argocd argo-cd-argocd-server -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'"
+  description = "Port-forward до Argo CD UI (https://localhost:8080, self-signed сертифікат)"
+  value       = "kubectl port-forward -n argocd svc/argo-cd-argocd-server 8080:443"
 }
 
 output "admin_password_command" {
