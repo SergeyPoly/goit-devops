@@ -8,7 +8,7 @@ metadata:
   labels:
     app: jenkins-agent
 spec:
-  serviceAccountName: default
+  serviceAccountName: jenkins-kaniko
   containers:
   - name: kaniko
     image: gcr.io/kaniko-project/executor:debug
@@ -20,6 +20,22 @@ spec:
       requests:
         cpu: 100m
         memory: 128Mi
+    volumeMounts:
+    - name: docker-config
+      mountPath: /kaniko/.docker
+  - name: aws-cli
+    image: amazon/aws-cli:latest
+    command:
+    - sleep
+    args:
+    - 99d
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    volumeMounts:
+    - name: docker-config
+      mountPath: /kaniko/.docker
   - name: git-tools
     image: alpine/git:latest
     command:
@@ -30,6 +46,9 @@ spec:
       requests:
         cpu: 100m
         memory: 128Mi
+  volumes:
+  - name: docker-config
+    emptyDir: {}
 '''
         }
     }
@@ -51,6 +70,19 @@ spec:
 
         stage('Build & Push Docker Image (Kaniko)') {
             steps {
+                container('aws-cli') {
+                    // ServiceAccount jenkins-kaniko (IRSA) дає права ECR push -
+                    // генеруємо docker config.json для Kaniko з ECR-токена,
+                    // не покладаючись на права ролі ноди.
+                    sh """
+                    mkdir -p /kaniko/.docker
+                    PASSWORD=\$(aws ecr get-login-password --region ${AWS_REGION})
+                    AUTH=\$(printf 'AWS:%s' "\$PASSWORD" | base64 -w0)
+                    cat > /kaniko/.docker/config.json <<EOF
+{"auths":{"${ECR_REPO.split('/')[0]}":{"auth":"\$AUTH"}}}
+EOF
+                    """
+                }
                 container('kaniko') {
                     sh """
                     /kaniko/executor \

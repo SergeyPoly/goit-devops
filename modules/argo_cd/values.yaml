@@ -1,5 +1,8 @@
 server:
+  # ClusterIP замість LoadBalancer: UI недоступний з інтернету публічно
+  # (без TLS-термінації там не було б жодного шифрування). Доступ - лише
+  # через kubectl port-forward, той самий підхід, що і для Grafana.
+  # --insecure прибрано - server повертає власний TLS (self-signed) за
+  # замовчуванням, тож port-forward тепер іде на https, а не http.
   service:
-    type: LoadBalancer
-  extraArgs:
-    - --insecure
+    type: ClusterIP

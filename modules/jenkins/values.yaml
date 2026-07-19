@@ -4,7 +4,10 @@ controller:
     registry: "docker.io"
     repository: "jenkins/jenkins"
     tag: "2.504.1-jdk17"
-  serviceType: LoadBalancer
+  # ClusterIP замість LoadBalancer: UI не публікується в інтернет без TLS.
+  # Доступ - лише через kubectl port-forward (той самий підхід, що і для
+  # Grafana та Argo CD).
+  serviceType: ClusterIP
   resources:
     requests:
       cpu: "500m"

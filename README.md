@@ -73,10 +73,13 @@ flowchart LR
 - Terraform >= 1.5, AWS CLI (налаштований `aws configure` з правами
   VPC/EKS/ECR/RDS/IAM/S3/DynamoDB), `kubectl`, `helm`.
 - AWS-акаунт. **Увага**: EKS control plane (~$0.10/год), NAT Gateway,
-  LoadBalancer-сервіси (Jenkins, Argo CD, django-app) і RDS-інстанс **не
-  повністю покриваються Free Tier** (Aurora — не покривається взагалі) — не
-  забувай `terraform destroy` одразу після перевірки/здачі (розділ
+  LoadBalancer для django-app і RDS-інстанс **не повністю покриваються Free
+  Tier** (Aurora — не покривається взагалі) — не забувай `terraform destroy`
+  одразу після перевірки/здачі (розділ
   [Знищення інфраструктури](#знищення-інфраструктури)).
+  Jenkins і Argo CD навмисно піднімаються без LoadBalancer (`ClusterIP`) —
+  UI не публікується в інтернет без TLS, доступ лише через
+  `kubectl port-forward`.
 - Скопіюй `terraform.tfvars.example` у `terraform.tfvars` (gitignored) і
   задай `postgres_password`, `django_secret_key`. `rds_password` — опційний
   (модуль `rds` згенерує пароль сам, якщо не задати). Детально про модуль
@@ -131,8 +134,8 @@ kubectl get hpa -A
 ### Доступ до Jenkins
 
 ```powershell
-kubectl get svc -n jenkins jenkins
-# EXTERNAL-IP з колонки вище -> http://<EXTERNAL-IP>:8080
+kubectl port-forward -n jenkins svc/jenkins 8081:8080
+# відкрити http://localhost:8081 (окремий термінал, команда тримає з'єднання)
 
 kubectl exec -n jenkins jenkins-0 -c jenkins -- cat /run/secrets/additional/chart-admin-password
 # логін: admin, пароль — вивід команди вище
@@ -168,8 +171,8 @@ git log --oneline -3 origin/final-project
 ### Доступ до Argo CD
 
 ```powershell
-kubectl get svc -n argocd argo-cd-argocd-server
-# EXTERNAL-IP -> https://<EXTERNAL-IP> (сервер піднятий з --insecure, тому http теж працює)
+kubectl port-forward -n argocd svc/argo-cd-argocd-server 8080:443
+# відкрити https://localhost:8080 (self-signed сертифікат — браузер попередить, це очікувано)
 
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
 # логін: admin, пароль — вивід команди вище (якщо секрет вже видалили — див. Settings -> Accounts в UI)
